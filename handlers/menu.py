@@ -11,20 +11,27 @@ from database.db import (
 )
 from keyboards.main_kb import main_menu, language_keyboard, subscription_keyboard
 from locales import t
+from locales.ru import texts as ru_texts
+from locales.en import texts as en_texts
+from locales.hy import texts as hy_texts
 from handlers.photo import user_last_result
 
 router = Router()
 ADMIN_ID = int(os.getenv("ADMIN_ID", "0"))
 
+# Собираем все возможные тексты кнопок из всех языков
+def all_btn(key):
+    return {ru_texts[key], en_texts[key], hy_texts[key]}
 
-@router.message(F.text.in_({"🚪 Выйти", "🚪 Exit", "🚪 Ելք"}))
+
+@router.message(F.text.in_(all_btn("btn_end")))
 async def btn_end(message: Message):
     user_id = message.from_user.id
     lang = await get_user_language(user_id)
     await message.answer(t(lang, "end"), reply_markup=ReplyKeyboardRemove())
 
 
-@router.message(F.text.in_({"🔄 Заново", "🔄 Restart", "🔄 Նորից"}))
+@router.message(F.text.in_(all_btn("btn_restart")))
 async def btn_restart(message: Message):
     user_id = message.from_user.id
     lang = await get_user_language(user_id)
@@ -32,14 +39,14 @@ async def btn_restart(message: Message):
     await message.answer(t(lang, "send_photo"))
 
 
-@router.message(F.text.in_({"📸 Анализировать фото", "📸 Analyse photo", "📸 Վերлուծել լուսանկարը"}))
+@router.message(F.text.in_(all_btn("btn_analyze")))
 async def btn_analyze(message: Message):
     user_id = message.from_user.id
     lang = await get_user_language(user_id)
     await message.answer(t(lang, "send_photo"))
 
 
-@router.message(F.text.in_({"📖 Рецепт", "📖 Recipe", "📖 Բաղаդրատոմս"}))
+@router.message(F.text.in_(all_btn("btn_recipe")))
 async def btn_recipe(message: Message):
     user_id = message.from_user.id
     lang = await get_user_language(user_id)
@@ -50,7 +57,7 @@ async def btn_recipe(message: Message):
     await message.answer(result["recipe"], parse_mode="Markdown")
 
 
-@router.message(F.text.in_({"💾 Сохранить", "💾 Save", "💾 Պահպանել"}))
+@router.message(F.text.in_(all_btn("btn_save")))
 async def btn_save(message: Message):
     user_id = message.from_user.id
     lang = await get_user_language(user_id)
@@ -67,7 +74,7 @@ async def btn_save(message: Message):
     await message.answer(t(lang, "saved"))
 
 
-@router.message(F.text.in_({"📊 Дневник питания", "📊 Food diary", "📊 Սննдի օրագիր"}))
+@router.message(F.text.in_(all_btn("btn_diary")))
 async def btn_diary(message: Message):
     user_id = message.from_user.id
     lang = await get_user_language(user_id)
@@ -87,16 +94,16 @@ async def btn_diary(message: Message):
     await message.answer("\n".join(lines), parse_mode="Markdown")
 
 
-@router.message(F.text.in_({"⚙️ Настройки", "⚙️ Settings", "⚙️ Կարգավորումներ"}))
+@router.message(F.text.in_(all_btn("btn_settings")))
 async def btn_settings(message: Message):
     user_id = message.from_user.id
     lang = await get_user_language(user_id)
     await message.answer(t(lang, "choose_language"), reply_markup=language_keyboard())
 
 
-@router.message(F.text.in_({"💳 Подписка", "💳 Subscription", "💳 Բաժանորդագրություն"}))
+@router.message(F.text.in_(all_btn("btn_subscription")))
 async def btn_subscription(message: Message):
-    user_id = message.from_user.id 
+    user_id = message.from_user.id
     lang = await get_user_language(user_id)
     has_sub = await check_subscription(user_id)
     if has_sub:
